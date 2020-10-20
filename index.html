@@ -4,9 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task 2. Парсер JSON</title>
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
+    <div class="container">
+        <h1 class="text-center">Задание 2. Динамический парсер JSON</h1>
+        <form>
+            <div class="form-group">
+              <label for="exampleFormControlFile1">Choose file for rendering</label>
+              <input type="file" class="form-control-file" id="exampleFormControlFile1">
+            </div>
+        </form>
+        <button type="button" id="generate" class="btn btn-success btn-block">Сгенерировать</button>
+        <button type="button" id="clear" class="btn btn-danger btn-block">Очистить</button>
+        <div id="servey" class="servey mt-5">
+        </div>
+    </div>
+    
+    <script src="./js/jquery-3.5.1.min.js"></script>
+    <script src="./js/popper.min.js"></script>
+    <script src="./js/bootstrap.js"></script>
     <script src="./js/script.js"></script>
 </body>
 </html>
