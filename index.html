@@ -10,15 +10,20 @@
 <body>
     <div class="container">
         <h1 class="text-center">Задание 2. Динамический парсер JSON</h1>
-        <form>
+        <h6 class="text-center">Быстров Евгений | Морские дьяволы</h4>
+        <form class="form-controll">
             <div class="form-group">
               <label for="exampleFormControlFile1">Choose file for rendering</label>
               <input type="file" class="form-control-file" id="exampleFormControlFile1">
             </div>
+
+            <div class="btn-group">
+              <button type="button" id="generate" class="btn btn-success">Сгенерировать</button>
+              <button type="button" id="clear" class="btn btn-danger">Очистить</button>
+            </div>
         </form>
-        <button type="button" id="generate" class="btn btn-success btn-block">Сгенерировать</button>
-        <button type="button" id="clear" class="btn btn-danger btn-block">Очистить</button>
-        <div id="servey" class="servey mt-5">
+        
+        <div id="content" class="content">
         </div>
     </div>
     

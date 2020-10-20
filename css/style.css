@@ -1,3 +1,33 @@
-.custom-file-label::after {
-  content: "Обзор";
+.content {
+  margin-top: 30px;
+}
+.form-controll {
+  text-align: center;
+}
+.form-controll .btn-group {
+  width: 60%;
+}
+.form-controll .form-group input {
+  border: 2px #eee solid;
+  border-radius: 2px;
+  padding: 10px;
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  overflow: hidden;
+}
+.form {
+  padding: 25px;
+  max-width: 60%;
+  margin: 0 auto;
+}
+.form-header {
+  text-align: center;
+  text-transform: uppercase;
+}
+.form-btns {
+  margin-top: 10px;
+}
+.form-group {
+  padding: 0;
 }

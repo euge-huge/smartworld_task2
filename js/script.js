@@ -120,10 +120,12 @@ const signin = {
 }
 
 
-
 /* 
     Данный скрипт позволяет динамически парсить JSON формат
     и на его основе отриовывать на странице форму.
+
+    Для удобства вынесены все функции, которые так или иначе работают с разметкой,
+    чтобы их было удобнее видоизменять
 */
 
 
@@ -132,61 +134,69 @@ $(document).ready(() => {
     const inputFile = document.getElementById("inputFile");
     const generateBtn = document.getElementById("generate");
     const clearBtn = document.getElementById("clear");
-    const content = document.getElementById("servey");
+    const content = document.getElementById("content");
 
 
-generateBtn.addEventListener("click", (event, json = signin) => {
-    let contentToShow = ``;
-    let serveyForm = ``;
-    let serveyHeader = ``
-    let serveyFormFields = ``;
-    let serveyReferences = ``;
-    let serveyButtons = ``;
+    // Обработчик события при нажатия на кнопку генерации
+    generateBtn.addEventListener("click", (event, json = signin) => {
+        let form = ``;
+        let formHeader = ``
+        let formFields = ``;
+        let formRefs = ``;
+        let formBtns = ``;
+        let error = ``;
 
 
-    Object.keys(signin).map(key => {
-        switch (key) {
-            case "name":
-                serveyHeader = createHeader(signin[key]);
-                break;
-            case "fields":
-                serveyFormFields = createFields(signin[key]);
-                break;
-            case "references":
-                serveyReferences = createRef(signin[key]);
-                break;
-            case "buttons":
-                serveyButtons = createButtons(signin[key]);
-                break;
-            default:
-                contentToShow = `ERROR`;
-                break;
+        // Пробегаем все ключи формы и передаем их в соответствующие функции, результат заносим в переменные
+        Object.keys(signin).map(key => {
+            switch (key) {
+                case "name":
+                    formHeader = createHeader(signin[key]);
+                    break;
+                case "fields":
+                    formFields = createFields(signin[key]);
+                    break;
+                case "references":
+                    formRefs = createRef(signin[key]);
+                    break;
+                case "buttons":
+                    formBtns = createButtons(signin[key]);
+                    break;
+                default:
+                    error = createErrorRendering();
+                    break;
+            }
+        })
+
+        // Если есть ошибка прекращаем проход
+        if (error) {
+            content.innerHTML = error
+            error = ``;
+            return;
         }
-        if (typeof signin[key] === "object") {
-             //signin[key].map(item => console.log(item))
-        }
+
+        // Собираем форму
+        form = createForm(formFields, formRefs, formBtns)
+
+        // Добавляем в разметку готовую форму
+        content.innerHTML = formHeader + form;
     })
 
-    serveyForm = `
-    <form action="#">
-    ${serveyFormFields}
-    ${serveyReferences}
-    ${serveyButtons}
-    </form>
+    // Обработчик событий при нажатии на кнопку отчистить
+    clearBtn.addEventListener("click", () => {
+        content.innerHTML = createClearMsg();
+    })
+
+})
+
+// Метод возвращает разметку название формы
+const createHeader = (header) => {
+    return `
+    <h2 class="form-header">${header}</h2>
     `
+}
 
-    content.innerHTML = serveyHeader + serveyForm;
-})
-
-clearBtn.addEventListener("click", () => {
-    content.innerHTML = ``
-})
-
-})
-
-
-
-
+// Метод создает все поля формы и добавляет их в одну переменную
 const createFields = (fields) => {
     let fieldsToAdd = ``;
     fields.map(item => {
@@ -197,55 +207,91 @@ const createFields = (fields) => {
     return fieldsToAdd;
 }
 
+// Метод создает каждый input в отдельности
+const createInputGroup = (label, input) => {
+    // WARNING: Я не уверен в правильности слудующей строки, но не придумал ничего лучше =)
+    let id = Math.floor(Math.random() * 10000)
+    return `
+    <div class="form-group ${input.type === 'checkbox' ? 'form-check' : ""} ">
+        ${label ? `<label for="${id}">${label}</label>` : ''}
+        <input id="${id}" class="${input.type === "file" ? "form-control-file" : input.type === "checkbox" ? "checkbox-input" : "form-control"}" type="${input.type}" required="${input.required}" placeholder="${input.placeholder ? input.placeholder : ""} ">
+    </div>
+    `
+}
+
+// Метод создает ссылки формы
 const createRef = (ref) => {
     let refsToAdd = ``;
 
     ref.map(item => {
         if (item.input) {
-            refsToAdd += createInputGroup("", item.input)
+            refsToAdd += `
+            <input class="" type="${item.input.type}" required="${item.input.required}" placeholder="${item.input.placeholder ? item.input.placeholder : ""} ">
+            `
         } else {
             let newRef = `
             <span class="ref">
-                ${item["text without ref"] ? item["text without ref"] : null} <a href="${item.ref}">${item.text}</a>
+                ${item["text without ref"] ? item["text without ref"] : ""} <a href="${item.ref}">${item.text}</a>
             </span>
           `
           refsToAdd += newRef;
         }
     })
 
+    refsToAdd = `
+        <div class="form-refs">
+            ${refsToAdd}
+        </div>
+    `
+
     return refsToAdd;
 }
 
+// Метод создает блок кнопок
 const createButtons = (buttons) => {
     let buttonsToAdd = ``;
     buttons.map(item => {
         buttonsToAdd += createButton(item);
     })
 
-    buttonsToAdd = `<div>${buttonsToAdd}</div>`
+    buttonsToAdd = `<div class="form-btns btn-group">${buttonsToAdd}</div>`
 
     return buttonsToAdd;
 }
 
-const createHeader = (header) => {
-    return `
-    <h2 class="text-center text-uppercase">${header}</h2>
-    `
-}
-
-const createInputGroup = (label, input) => {
-    let id = Math.floor(Math.random() * 10000)
-    return `
-    <div class="form-group">
-        <label for="${id}">${label}</label>
-        <input id="${id}" class="form-control" type="${input.type}" required="${input.required}" placeholder="${input.placeholder ? input.placeholder : ""} ">
-    </div>
-    `
-}
-
+// Метод создает отдельную кнопку
 const createButton = (button) => {
     return `
-    <button class="btn btn-default">${button.text}</button>
+    <button class="btn btn-primary">${button.text}</button>
     `;
+}
+
+
+// Метод, который собирает всю форму в единую
+const createForm = (fields, refs, btns) => {
+    return `
+        <form action="#" class="form card">
+            ${fields}
+            ${refs}
+            ${btns}
+        </form>
+    `
+}
+
+// Сообщение, появляется при очистке
+const createClearMsg = () => {
+    return `
+        <div class="form-cleared">
+            Форма отчищена, посторите ее заново или выбирете другую?
+        </div>
+    `
+}
+
+const createErrorRendering = () => {
+    return `
+        <div class="form-error">
+            Извините, во время рендеринга что-то пошло не так. Проверьте файл и попробуйте снова.
+        </div>
+    `
 }
 
