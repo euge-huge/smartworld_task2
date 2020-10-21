@@ -211,12 +211,31 @@ const createFields = (fields) => {
 const createInputGroup = (label, input) => {
     // WARNING: Я не уверен в правильности слудующей строки, но не придумал ничего лучше =)
     let id = Math.floor(Math.random() * 10000)
+    let parsedInputFields = parseInput(input);
     return `
     <div class="form-group ${input.type === 'checkbox' ? 'form-check' : ""} ">
         ${label ? `<label for="${id}">${label}</label>` : ''}
-        <input id="${id}" class="${input.type === "file" ? "form-control-file" : input.type === "checkbox" ? "checkbox-input" : "form-control"}" type="${input.type}" required="${input.required}" placeholder="${input.placeholder ? input.placeholder : ""} ">
+        <input 
+            id="${id}" 
+            class="${input.type === "file" 
+                ? "form-control-file" 
+                    : input.type === "checkbox" 
+                        ? "checkbox-input" 
+                            : "form-control"}"
+            ${parsedInputFields}
+        >
     </div>
     `
+}
+
+// Метод парсит все поля инпута
+const parseInput = (input) => {
+    let inputToAdd = ``;
+    Object.keys(input).map(item => {
+        inputToAdd += ` ${item}="${String(input[item])}"`
+        console.log();
+    })
+    return inputToAdd;
 }
 
 // Метод создает ссылки формы
@@ -281,15 +300,15 @@ const createForm = (fields, refs, btns) => {
 // Сообщение, появляется при очистке
 const createClearMsg = () => {
     return `
-        <div class="form-cleared">
-            Форма отчищена, посторите ее заново или выбирете другую?
+        <div class="form-cleared alert alert-primary" role="alert">
+            Форма очищена, построите ее заново или выберите другую?
         </div>
     `
 }
 
 const createErrorRendering = () => {
     return `
-        <div class="form-error">
+        <div class="form-error alert alert-danger" role="alert">
             Извините, во время рендеринга что-то пошло не так. Проверьте файл и попробуйте снова.
         </div>
     `

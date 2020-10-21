@@ -8,24 +8,33 @@
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
+  <div class="app">
     <div class="container">
-        <h1 class="text-center">Задание 2. Динамический парсер JSON</h1>
-        <h6 class="text-center">Быстров Евгений | Морские дьяволы</h4>
-        <form class="form-controll">
-            <div class="form-group">
-              <label for="exampleFormControlFile1">Choose file for rendering</label>
-              <input type="file" class="form-control-file" id="exampleFormControlFile1">
-            </div>
+      <h1 class="text-center">Задание 2. Динамический парсер JSON</h1>
+      <h6 class="text-center">Быстров Евгений | Морские дьяволы</h4>
+      <form class="form-controll">
+          <div class="form-group">
+            <label for="exampleFormControlFile1">Выберите JSON для рендеринга</label>
+            <input type="file" class="form-control-file" id="exampleFormControlFile1">
+          </div>
 
-            <div class="btn-group">
-              <button type="button" id="generate" class="btn btn-success">Сгенерировать</button>
-              <button type="button" id="clear" class="btn btn-danger">Очистить</button>
-            </div>
-        </form>
-        
-        <div id="content" class="content">
+          <div class="btn-group">
+            <button type="button" id="generate" class="btn btn-success">Сгенерировать</button>
+            <button type="button" id="clear" class="btn btn-danger">Очистить</button>
+          </div>
+      </form>
+      
+      <div id="content" class="content">
+        <div class="start-alert alert alert-success" role="alert">
+          <h4 class="text-center">Инструкция</h4>
+          <p>Выберите JSON документ в форме выше и нажмите кнопку "Сгенерировать", чтобы построить форму</p>
+          <p>Чтобы отчистить форму нажмите красную кнопку</p>
+          <p>Все легко и просто! Удачи =)</p>
         </div>
-    </div>
+      </div>
+  </div>
+  </div>
+    
     
     <script src="./js/jquery-3.5.1.min.js"></script>
     <script src="./js/popper.min.js"></script>
