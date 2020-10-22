@@ -1,123 +1,5 @@
-const signin = {
-    "name":"interview",
-    "fields":[
-        {
-            "label":"Введите своё ФИО",
-            "input":{
-                "type":"text",
-                "required":true,
-                "placeholder":"Иванов Иван Иванович"
-            }
-        },
-        {
-          "label":"Введите Номер телефона",
-          "input":{
-              "type":"number",
-              "required":true,
-              "mask": "+7 (999) 99-99-999"
-          }
-        },
-        {
-          "label":"Введите свою Почту",
-          "input":{
-              "type":"email",
-              "required":true,
-              "placeholder":"example@mail.com"
-          }
-        },
-        {
-            "label":"Введите свой возраст",
-            "input":{
-                "type":"number",
-                "required":true
-            }
-        },
-        {
-            "label":"Введите вашу специальность",
-            "input":{
-                "type":"text",
-                "required":true
-            }
-        },
-        {
-            "label":"Выберете технологии, с которыми вы работали",
-            "input":{
-                "type":"technology",
-                "required": true,
-                "technologies": ["PHP", "JS", "Laravel", "Express.js", "Yii2", "HTML", "CSS", "Java"],
-                "multiple": true
-            }
-        },
-        {
-            "label":"Ваш срок работы",
-            "input":{
-                "type":"number",
-                "required": true
-            }
-        },
-        {
-            "label":"Ваша фотография",
-            "input":{
-                "type":"file",
-                "required":true
-            }
-        },
-        {
-            "label":"Серия, номер",
-            "input":{
-                "type": "number",
-                "required": true,
-                "mask": "99-99 999999"
-            }
-        },
-        {
-            "label":"Код подразделения",
-            "input":{
-                "type": "number",
-                "required": true,
-                "mask": "999-999"
-            }
-        },
-        {
-            "label":"Скан / Фото паспорта (1 страница)",
-            "input":{
-                "type": "file",
-                "required": true,
-                "multiple": true,
-                "filetype": ["png", "jpeg", "pdf"]
-            }
-        },
-        {
-            "label":"Расскажите немного о себе",
-            "input":{
-                "type":"textarea",
-                "required:":true
-            }
-        }
-    ],
-    "references":[
-        {
-          "input":{
-            "type":"checkbox",
-            "required":true,
-            "checked":"false"
-          }
-        },
-        {
-            "text without ref":"I accept the",
-            "text":"Terms & Conditions",
-            "ref":"termsandconditions"
-        }
-    ],
-    "buttons":[
-        {
-            "text":"Send"
-        },
-        {
-            "text":"Cancel"
-        }
-    ]
-}
+let formToRender = null;
+
 
 
 /* 
@@ -131,14 +13,35 @@ const signin = {
 
 
 $(document).ready(() => {
-    const inputFile = document.getElementById("inputFile");
+    const inputFile = document.getElementById("file");
     const generateBtn = document.getElementById("generate");
     const clearBtn = document.getElementById("clear");
     const content = document.getElementById("content");
 
 
+    // Обработчик событи при загрузке файла
+    inputFile.addEventListener("change", (event) => {
+        const [file] = event.target.files;
+
+        if (file.type !== "text/javascript") {
+            return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
+        }
+
+        let reader = new FileReader();
+
+
+        reader.onload = (function(theFile) {
+            return function(event) {
+                formToRender = JSON.parse(event.target.result);
+            }
+        })(file)
+
+        reader.readAsText(file)
+    
+    })
+
     // Обработчик события при нажатия на кнопку генерации
-    generateBtn.addEventListener("click", (event, json = signin) => {
+    generateBtn.addEventListener("click", (event, json = formToRender) => {
         let form = ``;
         let formHeader = ``
         let formFields = ``;
@@ -146,24 +49,28 @@ $(document).ready(() => {
         let formBtns = ``;
         let error = ``;
 
+        if (!formToRender) {
+            return content.innerHTML = createErrorMsg("Не найден файл для рендеринга! Выберите JSON файл в форме выше!")
+        }
+
 
         // Пробегаем все ключи формы и передаем их в соответствующие функции, результат заносим в переменные
-        Object.keys(signin).map(key => {
+        Object.keys(formToRender).map(key => {
             switch (key) {
                 case "name":
-                    formHeader = createHeader(signin[key]);
+                    formHeader = createHeader(formToRender[key]);
                     break;
                 case "fields":
-                    formFields = createFields(signin[key]);
+                    formFields = createFields(formToRender[key]);
                     break;
                 case "references":
-                    formRefs = createRef(signin[key]);
+                    formRefs = createRef(formToRender[key]);
                     break;
                 case "buttons":
-                    formBtns = createButtons(signin[key]);
+                    formBtns = createButtons(formToRender[key]);
                     break;
                 default:
-                    error = createErrorRendering();
+                    error = createErrorMsg("Извините, во время рендеринга что-то пошло не так. Проверьте файл и попробуйте снова.");
                     break;
             }
         })
@@ -306,10 +213,10 @@ const createClearMsg = () => {
     `
 }
 
-const createErrorRendering = () => {
+const createErrorMsg = (msg) => {
     return `
         <div class="form-error alert alert-danger" role="alert">
-            Извините, во время рендеринга что-то пошло не так. Проверьте файл и попробуйте снова.
+            ${msg}
         </div>
     `
 }
