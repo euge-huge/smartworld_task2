@@ -19,44 +19,54 @@ $(document).ready(() => {
     const clearBtn = document.getElementById("clear");
     const content = document.getElementById("content");
 
-    var inputs = document.querySelectorAll( '.inputfile' );
-    Array.prototype.forEach.call( inputs, function( input )
+    let input = document.getElementById( 'file' );
+    let label    = input.nextElementSibling,
+    labelVal = label.innerHTML;
+    input.addEventListener( 'change', function( e )
     {
-        var label    = input.nextElementSibling,
-            labelVal = label.innerHTML;
-     
-        input.addEventListener( 'change', function( e )
-        {
-            var fileName = '';
-            if( this.files && this.files.length > 1 )
-                fileName = ( this.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', this.files.length );
-            else
-                fileName = e.target.value.split( '\\' ).pop();
-     
-            if( fileName )
-                label.querySelector( 'span' ).innerHTML = fileName;
-            else
-                label.innerHTML = labelVal;
+        let fileName = '';
+        if( this.files && this.files.length > 1 )
+            fileName = ( this.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', this.files.length );
+        else
+            fileName = e.target.value.split( '\\' ).pop();
+    
+        if( fileName )
+            label.querySelector( 'span' ).innerHTML = fileName;
+        else
+            label.innerHTML = labelVal;
 
-                const [file] = event.target.files;
+            const [file] = event.target.files;
 
-                if (file.type !== "text/javascript") {
-                    formToRender = null;
-                    return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
+            if (file.type !== "text/javascript") {
+                formToRender = null;
+                return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
+            }
+    
+            let reader = new FileReader();
+    
+    
+            reader.onload = (function(theFile) {
+                return function(event) {
+                    formToRender = JSON.parse(event.target.result);
                 }
-        
-                let reader = new FileReader();
-        
-        
-                reader.onload = (function(theFile) {
-                    return function(event) {
-                        formToRender = JSON.parse(event.target.result);
-                    }
-                })(file)
-        
-                reader.readAsText(file)
-        });
+            })(file)
+    
+            reader.readAsText(file)
     });
+
+    // Для выбора существующих файлов
+    const exists = document.getElementById('exists-json')
+    const exampleJsons = window.exampleJsons
+    const select = createSelect(exampleJsons);
+    exists.innerHTML = select
+    const selectExample = document.getElementById("selectExample")
+    const exampleBtn = document.getElementById("example-btn");
+    
+
+    exampleBtn.addEventListener('click', ()=> {
+        const idx = selectExample.selectedIndex
+        renderForm(exampleJsons[idx])
+    })
 
 
     // Обработчик событи при загрузке файла
@@ -80,8 +90,19 @@ $(document).ready(() => {
     })
 
     // Обработчик события при нажатия на кнопку генерации
-    generateBtn.addEventListener("click", (event, json = formToRender) => {
-        let form = ``;
+    generateBtn.addEventListener("click", () => {
+        renderForm(formToRender)
+    })
+
+    // Обработчик событий при нажатии на кнопку отчистить
+    clearBtn.addEventListener("click", () => {
+        content.innerHTML = createClearMsg();
+    })
+
+})
+
+const renderForm = (formToRender) => {
+    let form = ``;
         let formHeader = ``
         let formFields = ``;
         let formRefs = ``;
@@ -159,15 +180,27 @@ $(document).ready(() => {
             })
             
         });
+}
 
+const createSelect = (options) => {
+    let optionToAdd = ``;
+    options.map(item => {
+        optionToAdd += `<option value="${item.name}" >${item.name}</option>`
     })
 
-    // Обработчик событий при нажатии на кнопку отчистить
-    clearBtn.addEventListener("click", () => {
-        content.innerHTML = createClearMsg();
-    })
+    return `
+    <div class="example-input input-group">
+    <div class="input-group-prepend">
+      <button id="example-btn" class="btn btn-outline-info" type="button">Построить пример</button>
+    </div>
+    <select class="custom-select" id="selectExample" aria-label="Example select with button addon">
+    ${optionToAdd}
+    </select>
+    </div>
+    ` 
+    
+}
 
-})
 
 // Метод возвращает разметку название формы
 const createHeader = (header) => {

@@ -6,9 +6,6 @@
   flex-direction: column;
   justify-content: space-between;
 }
-h6 {
-  color: #777;
-}
 .content {
   margin-top: 30px;
 }
@@ -49,6 +46,17 @@ h6 {
 .inputfile + label:hover {
   background-color: rgba(57, 175, 33, 0.938);
 }
+.else-span {
+  display: block;
+  margin-top: 20px;
+  text-transform: uppercase;
+  color: #00838f;
+  font-weight: bold;
+}
+.example-input {
+  width: 65%;
+  margin: 20px auto;
+}
 .form-controll {
   margin-top: 20px;
   text-align: center;
@@ -82,9 +90,19 @@ h6 {
   padding: 0;
 }
 .footer {
+  text-align: center;
   border-top: 1px #94adff solid;
+  font-size: 14px;
+  color: rgba(0, 22, 95, 0.63);
   margin-top: 20px;
   padding: 20px 0;
+}
+.footer p {
+  margin: 0;
+}
+.footer p:last-child {
+  font-size: 13px;
+  font-weight: 200;
 }
 @media screen and (max-width: 970px) {
   .alert {
