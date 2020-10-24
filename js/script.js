@@ -12,17 +12,56 @@ let formToRender = null;
 
 
 
+
 $(document).ready(() => {
     const inputFile = document.getElementById("file");
     const generateBtn = document.getElementById("generate");
     const clearBtn = document.getElementById("clear");
     const content = document.getElementById("content");
 
+    var inputs = document.querySelectorAll( '.inputfile' );
+    Array.prototype.forEach.call( inputs, function( input )
+    {
+        var label    = input.nextElementSibling,
+            labelVal = label.innerHTML;
+     
+        input.addEventListener( 'change', function( e )
+        {
+            var fileName = '';
+            if( this.files && this.files.length > 1 )
+                fileName = ( this.getAttribute( 'data-multiple-caption' ) || '' ).replace( '{count}', this.files.length );
+            else
+                fileName = e.target.value.split( '\\' ).pop();
+     
+            if( fileName )
+                label.querySelector( 'span' ).innerHTML = fileName;
+            else
+                label.innerHTML = labelVal;
+
+                const [file] = event.target.files;
+
+                if (file.type !== "text/javascript") {
+                    formToRender = null;
+                    return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
+                }
+        
+                let reader = new FileReader();
+        
+        
+                reader.onload = (function(theFile) {
+                    return function(event) {
+                        formToRender = JSON.parse(event.target.result);
+                    }
+                })(file)
+        
+                reader.readAsText(file)
+        });
+    });
+
 
     // Обработчик событи при загрузке файла
     inputFile.addEventListener("change", (event) => {
         const [file] = event.target.files;
-
         if (file.type !== "text/javascript") {
             return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
         }
@@ -87,6 +126,40 @@ $(document).ready(() => {
 
         // Добавляем в разметку готовую форму
         content.innerHTML = formHeader + form;
+
+
+        // Добавляем маски там где это нужно
+        $(".form-control[mask]").each(function() {
+            $(this).mask($(this).attr('mask'))
+        });
+
+        // Обрабатываем поля с множественным выбором, в случае недопустимого формата блокируем кнопки
+        $(".form-control-file").each(function() {
+            $(this).on('change', (e) => {
+                let error = false
+                let extensions = $(this).attr('filetype').split(',');
+                Object.keys(e.target.files).map(item => {
+                    let type = e.target.files[item].type.split('/').pop();
+                    if (extensions.indexOf(type) < 0) {
+                        alert("Выберите файл с допустимым расширением: " + extensions)
+                        error = true;
+                    }
+                })
+                if (error) {
+                    $(this).files = null;
+
+                    $(".form-btns").children().each(function() {
+                        $(this).attr('disabled', true);
+                    }) 
+                } else {
+                    $(".form-btns").children().each(function() {
+                        $(this).attr('disabled', false);
+                    }) 
+                }
+            })
+            
+        });
+
     })
 
     // Обработчик событий при нажатии на кнопку отчистить
@@ -122,7 +195,7 @@ const createInputGroup = (label, input) => {
     return `
     <div class="form-group ${input.type === 'checkbox' ? 'form-check' : ""} ">
         ${label ? `<label for="${id}">${label}</label>` : ''}
-        <input 
+        ${input.type == 'textarea' ? '<textarea ' : '<input '} 
             id="${id}" 
             class="${input.type === "file" 
                 ? "form-control-file" 
@@ -130,7 +203,7 @@ const createInputGroup = (label, input) => {
                         ? "checkbox-input" 
                             : "form-control"}"
             ${parsedInputFields}
-        >
+            ${input.type == 'textarea' ? ' > </textarea>' : ' > '} 
     </div>
     `
 }
@@ -138,7 +211,11 @@ const createInputGroup = (label, input) => {
 // Метод парсит все поля инпута
 const parseInput = (input) => {
     let inputToAdd = ``;
-    Object.keys(input).map(item => {
+    let inputToParse = input;
+    if (inputToParse.mask) {
+        inputToParse.type = "text"
+    }
+    Object.keys(inputToParse).map(item => {
         inputToAdd += ` ${item}="${String(input[item])}"`
         console.log();
     })
@@ -207,15 +284,16 @@ const createForm = (fields, refs, btns) => {
 // Сообщение, появляется при очистке
 const createClearMsg = () => {
     return `
-        <div class="form-cleared alert alert-primary" role="alert">
+        <div class="alert alert-primary" role="alert">
             Форма очищена, построите ее заново или выберите другую?
         </div>
     `
 }
 
+// Генерирует красный алерт ошибки 
 const createErrorMsg = (msg) => {
     return `
-        <div class="form-error alert alert-danger" role="alert">
+        <div class="alert alert-danger" role="alert">
             ${msg}
         </div>
     `
