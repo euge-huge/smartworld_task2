@@ -51,21 +51,6 @@ $(document).ready(() => {
             reader.readAsText(file)
     });
 
-    // Для выбора существующих файлов
-    const exists = document.getElementById('exists-json')
-    const exampleJsons = window.exampleJsons
-    const select = createSelect(exampleJsons);
-    exists.innerHTML = select
-    const selectExample = document.getElementById("selectExample")
-    const exampleBtn = document.getElementById("example-btn");
-    
-
-    exampleBtn.addEventListener('click', ()=> {
-        const idx = selectExample.selectedIndex
-        renderForm(exampleJsons[idx])
-    })
-
-
     // Обработчик событи при загрузке файла
     inputFile.addEventListener("change", (event) => {
         const [file] = event.target.files;
@@ -206,27 +191,6 @@ const setCursorPosition = (pos, e) => {
     }
 }
 
-
-const createSelect = (options) => {
-    let optionToAdd = ``;
-    options.map(item => {
-        optionToAdd += `<option value="${item.name}" >${item.name.replaceAll("_", " ")}</option>`
-    })
-
-    return `
-    <div class="example-input input-group">
-    <div class="input-group-prepend">
-      <button id="example-btn" class="btn btn-outline-info" type="button">Построить пример</button>
-    </div>
-    <select class="custom-select" id="selectExample" aria-label="Example select with button addon">
-    ${optionToAdd}
-    </select>
-    </div>
-    ` 
-    
-}
-
-
 // Метод возвращает разметку название формы
 const createHeader = (header) => {
     return `
@@ -251,7 +215,7 @@ const createInputGroup = (label, input) => {
     let id = Math.floor(Math.random() * 10000)
     let parsedInputFields = parseInput(input);
 
-    if (input.type === "technology") {
+    if (input.type == "technology") {
         return `
         <div class="form-group">
         ${label ? `<label class="d-block" for="${id}">${label}</label>` : ''}
@@ -261,7 +225,7 @@ const createInputGroup = (label, input) => {
     }
 
     // Отдельный обработичк для колорпикера
-    if (input.type === 'color') {
+    if (input.type == 'color') {
         return `
         <div class="form-group">
         ${label ? `<label for="${id}">${label}</label>` : ''}
@@ -278,13 +242,13 @@ const createInputGroup = (label, input) => {
     }
 
     return `
-    <div class="form-group ${input.type === 'checkbox' ? 'form-check' : ""} ">
+    <div class="form-group ${input.type == 'checkbox' ? 'form-check' : ""} ">
         ${label ? `<label for="${id}">${label}</label>` : ''}
         ${input.type == 'textarea' ? '<textarea ' : '<input '} 
             id="${id}" 
-            class="${input.type === "file" 
+            class="${input.type == "file" 
                 ? "form-control-file" 
-                    : input.type === "checkbox" 
+                    : input.type == "checkbox" 
                         ? "checkbox-input" 
                             : "form-control"}"
             ${parsedInputFields}
@@ -302,6 +266,12 @@ const parseInput = (input) => {
     }
     Object.keys(inputToParse).map(item => {
         inputToAdd += ` ${item}="${String(input[item])}"`
+        if (inputToParse.filetype) {
+            acc = inputToParse.filetype
+            if (acc.indexOf("jpg") || acc.indexOf("png") || acc.indexOf("pdf")) {
+                inputToAdd += ` accept="image/*"`
+            }
+        }
     })
     return inputToAdd;
 }
@@ -366,7 +336,7 @@ const createButtons = (buttons) => {
         buttonsToAdd += createButton(item);
     })
 
-    buttonsToAdd = `<div class="form-btns btn-group">${buttonsToAdd}</div>`
+    buttonsToAdd = `<div class="form-btns">${buttonsToAdd}</div>`
 
     return buttonsToAdd;
 }
@@ -374,7 +344,7 @@ const createButtons = (buttons) => {
 // Метод создает отдельную кнопку
 const createButton = (button) => {
     return `
-    <button class="btn btn-primary">${button.text}</button>
+    <button class="btn btn-primary btn-block">${button.text}</button>
     `;
 }
 
