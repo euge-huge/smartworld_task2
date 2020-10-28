@@ -21,6 +21,7 @@
   text-align: center;
 }
 .inputfile {
+  display: none !important;
   width: 0.1px;
   height: 0.1px;
   opacity: 0;
