@@ -11,15 +11,14 @@ let formToRender = null;
 
 
 $(document).ready(() => {
-    const inputFile = document.getElementById("file");
     const generateBtn = document.getElementById("generate");
     const clearBtn = document.getElementById("clear");
     const content = document.getElementById("content");
-
     let input = document.getElementById( 'file' );
     let label    = input.nextElementSibling,
     labelVal = label.innerHTML;
-    input.addEventListener( 'change', function( e )
+
+    input.addEventListener( 'change', ( e ) =>
     {
         let fileName = '';
         if( this.files && this.files.length > 1 )
@@ -32,14 +31,15 @@ $(document).ready(() => {
         else
             label.innerHTML = labelVal;
 
-            const [file] = event.target.files;
+            const [file] = e.target.files;
 
-            if (file.type !== "text/javascript") {
+            if ((file.type !== "text/javascript") && (file.type !== "application/x-javascript")) {
                 formToRender = null;
-                return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
+                content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
             }
     
             let reader = new FileReader();
+
     
     
             reader.onload = (function(theFile) {
@@ -50,26 +50,28 @@ $(document).ready(() => {
     
             reader.readAsText(file)
     });
+    
+
 
     // Обработчик событи при загрузке файла
-    inputFile.addEventListener("change", (event) => {
-        const [file] = event.target.files;
-        if (file.type !== "text/javascript") {
-            return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
-        }
+//    inputFile.addEventListener("change", (event) => {
+//         const [file] = event.target.files;
+//         if ((file.type !== "text/javascript") && (file.type !== "application/x-javascript")) {
+//             return content.innerHTML = createErrorMsg("Вы загрузили не JSON файл. Попробуйте заново!")
+//         }
 
-        let reader = new FileReader();
+//         let reader = new FileReader();
 
 
-        reader.onload = (function(theFile) {
-            return function(event) {
-                formToRender = JSON.parse(event.target.result);
-            }
-        })(file)
+//         reader.onload = (function(theFile) {
+//             return function(event) {
+//                 formToRender = JSON.parse(event.target.result);
+//             }
+//         })(file)
 
-        reader.readAsText(file)
+//         reader.readAsText(file)
     
-    })
+//     })
 
     // Обработчик события при нажатия на кнопку генерации
     generateBtn.addEventListener("click", () => {
@@ -78,12 +80,14 @@ $(document).ready(() => {
 
     // Обработчик событий при нажатии на кнопку отчистить
     clearBtn.addEventListener("click", () => {
+        const content = document.getElementById("content");
         content.innerHTML = createClearMsg();
     })
 
 })
 
 const renderForm = (formToRender) => {
+    const content = document.getElementById("content");
     let form = ``;
         let formHeader = ``
         let formFields = ``;
@@ -126,7 +130,6 @@ const renderForm = (formToRender) => {
 
         // Собираем форму
         form = createForm(formFields, formRefs, formBtns)
-
         // Добавляем в разметку готовую форму
         content.innerHTML = formHeader + form;
 
@@ -190,6 +193,7 @@ const setCursorPosition = (pos, e) => {
       range.select()
     }
 }
+
 
 // Метод возвращает разметку название формы
 const createHeader = (header) => {
