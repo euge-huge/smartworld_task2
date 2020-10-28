@@ -1,7 +1,6 @@
 let formToRender = null;
 
 
-
 /* 
     Данный скрипт позволяет динамически парсить JSON формат
     и на его основе отриовывать на странице форму.
@@ -9,8 +8,6 @@ let formToRender = null;
     Для удобства вынесены все функции, которые так или иначе работают с разметкой,
     чтобы их было удобнее видоизменять
 */
-
-
 
 
 $(document).ready(() => {
@@ -213,7 +210,7 @@ const setCursorPosition = (pos, e) => {
 const createSelect = (options) => {
     let optionToAdd = ``;
     options.map(item => {
-        optionToAdd += `<option value="${item.name}" >${item.name}</option>`
+        optionToAdd += `<option value="${item.name}" >${item.name.replaceAll("_", " ")}</option>`
     })
 
     return `
@@ -233,7 +230,7 @@ const createSelect = (options) => {
 // Метод возвращает разметку название формы
 const createHeader = (header) => {
     return `
-    <h2 class="form-header">${header}</h2>
+    <h2 class="form-header">${header.replaceAll("_", " ")}</h2>
     `
 }
 
