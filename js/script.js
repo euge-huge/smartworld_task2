@@ -150,37 +150,65 @@ const renderForm = (formToRender) => {
 
 
         // Добавляем маски там где это нужно
-        $(".form-control[mask]").each(function() {
-            $(this).mask($(this).attr('mask'))
-        });
+        let formInput = document.querySelectorAll(".form-control[mask]")
+        Object.keys(formInput).map(idx => {
+            formInput[idx].addEventListener('input', (event) => {
+                mask(event)
+            });
+        })
 
-        // Обрабатываем поля с множественным выбором, в случае недопустимого формата блокируем кнопки
+        // !Обрабатываем поля с множественным выбором, в случае недопустимого формата блокируем кнопки
         $(".form-control-file").each(function() {
+            // Получаем сам инпут
+            let formControl = $(this)[0];
             $(this).on('change', (e) => {
-                let error = false
+                // Получаем список разрешений
                 let extensions = $(this).attr('filetype').split(',');
+
+                // Проходимся по массиву файлов
                 Object.keys(e.target.files).map(item => {
                     let type = e.target.files[item].type.split('/').pop();
+
+                    // Попадаем сюда если 
                     if (extensions.indexOf(type) < 0) {
-                        alert("Выберите файл с допустимым расширением: " + extensions)
-                        error = true;
+                    formControl.value = ""
+                    alert("Выберите файл с допустимым расширением: " + extensions)
                     }
                 })
-                if (error) {
-                    $(this).files = null;
-
-                    $(".form-btns").children().each(function() {
-                        $(this).attr('disabled', true);
-                    }) 
-                } else {
-                    $(".form-btns").children().each(function() {
-                        $(this).attr('disabled', false);
-                    }) 
-                }
             })
             
         });
 }
+
+// Метод создает маску к полю
+const mask = (e) => {
+    var matrix = e.target.getAttribute("mask").replace(/9/g, "_")// .defaultValue
+        i = 0;
+        def = matrix.replace(/\D/g, "");
+        val = e.target.value.replace(/\D/g, "");
+    def.length >= val.length && (val = def);
+    matrix = matrix.replace(/[_\d]/g, function(a) {
+      return val.charAt(i++) || "_"
+    });
+    e.target.value = matrix;
+    i = matrix.lastIndexOf(val.substr(-1));
+    i < matrix.length && matrix != e.target.placeholder ? i++ : i = matrix.indexOf("_");
+    setCursorPosition(i, e.target)
+}
+
+// Вспомогательный метод для маски
+const setCursorPosition = (pos, e) => {
+    e.focus();
+    if (e.setSelectionRange) e.setSelectionRange(pos, pos);
+    else if (e.createTextRange) {
+      var range = e.createTextRange();
+      range.collapse(true);
+      range.moveEnd("character", pos);
+      range.moveStart("character", pos);
+      range.select()
+    }
+}
+
 
 const createSelect = (options) => {
     let optionToAdd = ``;
@@ -225,6 +253,33 @@ const createInputGroup = (label, input) => {
     // WARNING: Я не уверен в правильности слудующей строки, но не придумал ничего лучше =)
     let id = Math.floor(Math.random() * 10000)
     let parsedInputFields = parseInput(input);
+
+    if (input.type === "technology") {
+        return `
+        <div class="form-group">
+        ${label ? `<label class="d-block" for="${id}">${label}</label>` : ''}
+            ${createTechnologySelect(input)}
+        </div>
+        `
+    }
+
+    // Отдельный обработичк для колорпикера
+    if (input.type === 'color') {
+        return `
+        <div class="form-group">
+        ${label ? `<label for="${id}">${label}</label>` : ''}
+        <input
+            id="${id}" 
+            class="form-control"
+            type="color"
+            ${input.colors ? 'list="colors"' : ""}
+            ${input.colors ? `value=${input.colors[0]}` : ""}
+        >
+        ${input.colors ? createColorList(input.colors) : ""}
+        </div>
+        `
+    }
+
     return `
     <div class="form-group ${input.type === 'checkbox' ? 'form-check' : ""} ">
         ${label ? `<label for="${id}">${label}</label>` : ''}
@@ -250,9 +305,33 @@ const parseInput = (input) => {
     }
     Object.keys(inputToParse).map(item => {
         inputToAdd += ` ${item}="${String(input[item])}"`
-        console.log();
     })
     return inputToAdd;
+}
+
+// Вспомогательный метод для колорпикера
+const createColorList = (colorList) => {
+    let colorListToAdd = ``
+    colorList.map(color => {
+        colorListToAdd += `<option value="${color}">`
+    })
+    colorListToAdd = `<datalist id="colors">${colorListToAdd}</datalist>`
+    return colorListToAdd;
+}
+
+const createTechnologySelect = (input) => {
+    let inlineToAdd = ``
+
+    input.technologies.map(item => {
+        inlineToAdd += `
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="${item}" value="${item}">
+            <label class="form-check-label" for="${item}">${item}</label>
+        </div>
+        `
+    })
+
+    return inlineToAdd;
 }
 
 // Метод создает ссылки формы
